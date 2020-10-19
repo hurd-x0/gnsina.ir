@@ -1,0 +1,20 @@
+body{
+	direction: rtl;
+}
+ 
+#users{
+	/*background: #E9EAED;*/
+	background:#9c9ea3;
+	text-align: center;
+	width:۳۰۰px;
+	margin: auto;
+	padding:۱۰px;
+	border-radius: ۵px;
+}
+ 
+#users .input{
+	padding: ۸px;
+	width: ۲۸۰px;
+	margin: ۵px ۰;
+	font-family: tahoma
+}

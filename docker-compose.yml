@@ -1,0 +1,101 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+
+#docker network create --driver bridge --subnet=172.30.10.0/24 wp-net
+
+version: "3.4"
+services:
+
+    mariadb:
+      image: mariadb:latest
+      container_name: mariadb
+      #working_dir: /application
+      #volumes:
+        #- .:/application
+      volumes:
+          - /mnt/PKG/Docker/Volume/mariadb/db:/var/lib/mysql
+          - /mnt/PKG/Docker/Volume/mariadb/mariadb.conf.d:/etc/mysql/mariadb.conf.d
+      environment:
+        - MYSQL_ROOT_PASSWORD=32547561
+        - MYSQL_DATABASE=wp_2_db
+        - MYSQL_USER=master
+        - MYSQL_PASSWORD=2547561
+      ports:
+        - "8083:3306"
+      #network_mode: wp-net
+         #MacAddress: "02:42:ac:1e:0a:03",
+         #IPv4Address: "172.30.10.3/24",
+         #ipv4_address: 172.30.10.3
+      networks:
+        web-net:
+           ipv4_address: 172.30.10.3
+           #mac_address:  02:42:ac:1e:0a:03
+    nginx:
+      image: nginx:alpine
+      container_name: nginx
+      working_dir: /application
+      volumes:
+          - .:/application
+          - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      ports:
+       - "8080:80"
+      #network_mode: wp-net
+      networks:
+        web-net:
+           ipv4_address: 172.30.10.4
+
+    php-fpm:
+      build: phpdocker/php-fpm
+      container_name: php-fpm
+      working_dir: /application
+      volumes:
+        - .:/application
+        - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
+      #network_mode: wp-net
+      networks:
+        web-net:
+           ipv4_address: 172.30.10.5
+
+        # Phpmyadmin Service
+    pma:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        #restart: always
+        #network_mode: wp-net
+        networks:
+             web-net:
+                ipv4_address: 172.30.10.6
+        ports:
+           - '8082:80'
+        environment:
+            PMA_HOST: mariadb
+            MYSQL_ROOT_PASSWORD: 32547561
+        depends_on:
+        - mariadb
+
+    ftp:
+        image: cyberduck/proftpd-mysql
+        container_name: ftp
+        #network_mode: wp-net
+        networks:
+             web-net:
+                 ipv4_address: 172.30.10.7
+        ports:
+            - "21:21"
+            - "20:20"
+            - "60000-60100:60000-60100"
+        environment:
+            FTP_USERNAME: 'master'
+            FTP_PASSWORD: '2547561'
+        volumes:
+           #- /path/to/ftp/folder:/home/ftp_user_name
+           - .:/application
+           - /home/master/project-me/PHP/wordpress/public/gnsina.ir:/home/master
+        #networks:
+            #- some_network_name
+       
+networks:
+   web-net:
+     external: true
+
